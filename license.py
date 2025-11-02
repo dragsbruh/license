@@ -49,15 +49,20 @@ def shell_completions(cmd: str, language: str):
     fish_completions(cmd)
 
 
-def save_license(name: str, out: str):
-    path = os.path.join(license_dir, f"{name}.txt")
+def match_license(name: str) -> str | None:
+    lower = name.lower()
+    for lic in licenses:
+        if lic.lower() == lower:
+            return os.path.join(license_dir, f"{lic}.txt")
+
+
+def save_license(name: str, path: str, out: str):
     shutil.copyfile(path, out)
     print(f"Saved license {name} as {out}")
     print("Remember to change the name and year in the license file!")
 
 
-def read_license(name: str):
-    path = os.path.join(license_dir, f"{name}.txt")
+def read_license(path: str):
     with open(path, "r") as f:
         shutil.copyfileobj(f, sys.stdout)
 
@@ -74,7 +79,7 @@ if __name__ == "__main__":
         print_licenses()
     elif command == "shell":
         if len(sys.argv) < 3:
-            print("Usage: license shell <langage>")
+            print("Usage: license shell <language>")
             print("Available shell completion languages are `fish`, yeah only `fish`")
             exit(1)
         language = sys.argv[2]
@@ -85,11 +90,16 @@ if __name__ == "__main__":
             print("Usage: license read <license>")
             exit(1)
         name = sys.argv[2]
-        read_license(name)
+        license_path = match_license(name)
+        if license_path is None:
+            print(f"Error: Unknown license - `{name}`")
+            exit(1)
+        read_license(license_path)
     else:
-        if command not in licenses:
+        license_path = match_license(command)
+        if license_path is None:
             print(f"Error: Unknown command/license - `{command}`")
             exit(1)
 
         out = sys.argv[2] if len(sys.argv) >= 3 else "LICENSE"
-        save_license(command, out)
+        save_license(command, license_path, out)
