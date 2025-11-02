@@ -53,6 +53,7 @@ def save_license(name: str, out: str):
     path = os.path.join(license_dir, f"{name}.txt")
     shutil.copyfile(path, out)
     print(f"Saved license {name} as {out}")
+    print("Remember to change the name and year in the license file!")
 
 
 def read_license(name: str):
